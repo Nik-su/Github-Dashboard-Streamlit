@@ -1,0 +1,8 @@
+streamlit 
+pymongo 
+pandas 
+matplotlib.pyplot as plt
+numpy 
+collections import defaultdict
+requests
+time
