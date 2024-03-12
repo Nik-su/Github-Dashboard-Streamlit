@@ -13,7 +13,6 @@ import requests
 import time
 
 client = MongoClient("mongodb://localhost:27017/") 
-#ACCESS_TOKEN = "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"
 db = client["github_users_file4"]  
 collection = db["user_collection"]
 def get_user_data(username):
