@@ -13,7 +13,7 @@ import requests
 import time
 
 client = MongoClient("mongodb://localhost:27017/") 
-ACCESS_TOKEN = "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"
+#ACCESS_TOKEN = "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"
 db = client["github_users_file4"]  
 collection = db["user_collection"]
 def get_user_data(username):
@@ -22,8 +22,8 @@ def get_user_data(username):
 
 def get_language_from_repo_url(repo_url):
     try: 
-        headers = {"Authorization": f"token {ACCESS_TOKEN}"}
-        response = requests.get(repo_url, headers=headers)
+        #headers = {"Authorization": f"token {ACCESS_TOKEN}"}
+        response = requests.get(repo_url)#, headers=headers)
         if response.status_code == 200:
             return response.json().get("language")
         elif response.status_code == 403:
@@ -107,10 +107,10 @@ def commit_per_repo_top10(user_data):
         st.write("No repository data available for this user.")
 def commits_per_repository(repo_url):
     try: 
-        headers = {"Authorization": f"token {ACCESS_TOKEN}"}
-        response = requests.get(repo_url, headers=headers)
+        #headers = {"Authorization": f"token {ACCESS_TOKEN}"}
+        response = requests.get(repo_url)#, headers=headers)
         if response.status_code == 200:
-            return response.json().get("commits_count", 0)  # Adjust this according to your API response
+            return response.json().get("commits_count", 0)  
         elif response.status_code == 403:
             print("Received a 403 error. Retrying after 15 minutes...")
             time.sleep(900)  # Sleep for 15 minutes
