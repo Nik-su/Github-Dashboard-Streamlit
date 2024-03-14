@@ -3,11 +3,12 @@
 ## commit_per_repo_top10(), stares_per_repo_top10()
 ## It will be completed
 ## Efficiently handle apis requests if possible
+##
 import streamlit as st
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 import pandas as pd
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
 import requests
@@ -129,7 +130,7 @@ def commits_per_repository(repo_url):#It is not shown in Front End
     return 0
 
 
-def commits_per_language(user_data):#It is shown in Front End but results are not updating bcz of api  limit
+def commits_per_language(user_data):
     st.subheader("Commits per Language")
     commits_per_language = defaultdict(int)
     starred_repos = user_data.get("Starred Repositories", "").split(",") if user_data.get("Starred Repositories") else []
@@ -140,13 +141,20 @@ def commits_per_language(user_data):#It is shown in Front End but results are no
         language = get_language_from_repo_url(repo_url_cleaned)
         if language:
             commits_per_language[language] += 1
-    languages = list(commits_per_language.keys())
-    commits = list(commits_per_language.values())
-    plt.figure(figsize=(8, 8))
-    plt.pie(commits, labels=languages, autopct='%1.1f%%', startangle=140)
-    plt.axis('equal') 
-    plt.title("Commits per Language")
-    st.pyplot(plt)
+    
+    # Convert data to pie chart compatible format
+    labels = list(commits_per_language.keys())
+    sizes = list(commits_per_language.values())
+
+    # Create pie chart
+    fig, ax = plt.subplots()
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    ax.axis('equal')  
+    ax.set_title('Commits per Language')
+
+    # Show the chart using Streamlit
+    st.pyplot(fig)
+
 
 def display_user_statistics(user_data):#It is Shown in front end
     st.subheader("User Statistics")
