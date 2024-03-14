@@ -5,16 +5,24 @@
 ## Efficiently handle apis requests if possible
 import streamlit as st
 from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
 import requests
 import time
+import os
 
-client = MongoClient("mongodb://localhost:27017/") 
-db = client["github_users_file4"]  
-collection = db["user_collection"]
+# client = MongoClient("mongodb://localhost:27017/") 
+# db = client["github_users_file4"]  
+# collection = db["user_collection"]
+uri = os.environ.get("MONGODB_URI")
+client = MongoClient(uri, server_api=ServerApi('1'))
+# db = client.get_database("Github_Profiles")
+# collection = db.get_collection("User_Collection")
+db = client["Github_Profiles"]  
+collection = db["User_Collection"]
 def get_user_data(username):
     user_data = collection.find_one({"Login": username})
     return user_data
@@ -35,7 +43,7 @@ def get_language_from_repo_url(repo_url):
         print(f"Error fetching repository data for {repo_url}: {e}")
     return None
 
-def stars_per_language(user_data):
+def stars_per_language(user_data):# It is shown in Front End
     st.subheader("Stars per Language")
     stars_per_language = defaultdict(int)
     starred_repos = user_data.get("Starred Repositories", "").split(",") if user_data.get("Starred Repositories") else []
@@ -56,7 +64,7 @@ def stars_per_language(user_data):
     else:
         st.write("No repository data available for this user.")
 
-def stars_per_repo_top10(user_data):
+def stars_per_repo_top10(user_data):#Not Showing In front end
     st.subheader("Top 10 Starred Repositories")
     starred_repos = user_data.get("Starred Repositories", "").split(",") if user_data.get("Starred Repositories") else []
     if starred_repos:
@@ -71,7 +79,7 @@ def stars_per_repo_top10(user_data):
     else:
         st.write("No starred repository data available for this user.")
 
-def get_repos_per_language(user_data):
+def get_repos_per_language(user_data):#It is shown in Front End
     st.subheader("Repositories per Language")
     repos_per_language = defaultdict(int)
     starred_repos = user_data.get("Starred Repositories", "").split(",") if user_data.get("Starred Repositories") else []
@@ -88,7 +96,7 @@ def get_repos_per_language(user_data):
     else:
         st.write("No repository data available for this user.")
 
-def commit_per_repo_top10(user_data):
+def commit_per_repo_top10(user_data):#It is not shown in Front End
     st.subheader("Top 10 Repositories by Commits")
     starred_repos = user_data.get("Starred Repositories", "").split(",") if user_data.get("Starred Repositories") else []
     subscriptions = user_data.get("Subscriptions", "").split(",") if user_data.get("Subscriptions") else []
@@ -104,7 +112,7 @@ def commit_per_repo_top10(user_data):
         st.write(df.set_index("Repository"))
     else:
         st.write("No repository data available for this user.")
-def commits_per_repository(repo_url):
+def commits_per_repository(repo_url):#It is not shown in Front End
     try: 
         #headers = {"Authorization": f"token {ACCESS_TOKEN}"}
         response = requests.get(repo_url)#, headers=headers)
@@ -121,7 +129,7 @@ def commits_per_repository(repo_url):
     return 0
 
 
-def commits_per_language(user_data):
+def commits_per_language(user_data):#It is shown in Front End but results are not updating bcz of api  limit
     st.subheader("Commits per Language")
     commits_per_language = defaultdict(int)
     starred_repos = user_data.get("Starred Repositories", "").split(",") if user_data.get("Starred Repositories") else []
@@ -140,13 +148,13 @@ def commits_per_language(user_data):
     plt.title("Commits per Language")
     st.pyplot(plt)
 
-def display_user_statistics(user_data):
+def display_user_statistics(user_data):#It is Shown in front end
     st.subheader("User Statistics")
     st.write("Number of Public Repositories:", user_data.get("Public Repositories", 0))
     st.write("Total Commits:", user_data.get("Total Commits", 0))
     st.write("Languages Used:", user_data.get("Languages",))
 
-def display_popular_languages(user_data):
+def display_popular_languages(user_data):#It is Shown in front end
     st.subheader("Popular Languages")
     languages_string = user_data.get("Languages", "")
     languages_dict = {}
@@ -161,18 +169,24 @@ def display_popular_languages(user_data):
     else:
         st.write("No language data available for this user.")
 
-def display_average_commits(user_data):
+def display_average_commits(user_data):#It is shown in Front End
     st.subheader("Average Commits")
-    followers_count = user_data.get("Followers Count", 0)
-    following_count = user_data.get("Following Count", 0)
-    average_commits = user_data.get("Total Commits", 0) / max(followers_count, 1)
+
+    # Convert followers_count and following_count to integers
+    followers_count = int(user_data.get("Followers Count", 0))
+    following_count = int(user_data.get("Following Count", 0))
+    
+    # Calculate average_commits
+    average_commits = int(user_data.get("Total Commits", 0)) / max(followers_count, 1)
+    
     st.write("Average Commits per Follower:", average_commits)
 
-def display_profile_analytics(user_data):
+
+def display_profile_analytics(user_data):#It is shown in Front End
     st.subheader("Profile Analytics")
     st.write("User Bio:", user_data.get("Bio", ""))
     
-def search_and_display_profile():
+def search_and_display_profile():#main progream
     st.sidebar.header("Search GitHub Profile")
     username = st.sidebar.text_input("Enter GitHub Username:")
     if st.sidebar.button("Search"):
